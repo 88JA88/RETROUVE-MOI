@@ -15,10 +15,15 @@
     <main id="owner-view" class="owner-view">
       <header class="site-header"><a class="brand" href="./"><span>✦</span> RETROUVE-moi</a></header>
       <section class="owner-layout">
-        <div class="intro">
-          <p class="eyebrow">Créer une étiquette</p>
-          <h1>Une petite étiquette.<br><em>Un grand soulagement.</em></h1>
-          <p>Vos coordonnées sont intégrées au QR, sans compte ni serveur. La personne qui trouve votre objet choisit d’abord de vous aider.</p>
+        <div class="left-column">
+          <div class="intro">
+            <h1>Une petite étiquette.<br><em>Un grand soulagement.</em></h1>
+          </div>
+          <section id="label-section" class="label-section" hidden>
+            <div class="label-controls"><div><h2>Votre étiquette</h2></div><label class="size-picker">Dimension<select id="label-size"><option value="small">Petite · 50 mm</option><option value="medium" selected>Moyenne · 70 mm</option><option value="large">Grande · 90 mm</option></select></label></div>
+            <div id="print-label" class="print-label size-medium"><strong>🧭 JE ME SUIS PERDU !</strong><div id="qrcode" aria-label="QR code de votre objet"></div><em>Je compte sur vous…</em></div>
+            <button id="print-button" class="primary print-button" type="button">Imprimer l’étiquette</button>
+          </section>
         </div>
         <form id="owner-form" class="settings-card">
           <h2>Vos coordonnées</h2>
@@ -28,15 +33,10 @@
             <label>E-mail<input name="email" type="email" autocomplete="email" placeholder="vous@exemple.fr"></label>
           </div>
           <p class="hint">Indiquez au moins un moyen de contact.</p>
-          <fieldset><legend>Objet <small>facultatif</small></legend><label>Nom de l’objet<input name="object" placeholder="Ex. trousseau de clés"></label><label>Identifiant<input name="identifier" placeholder="Ex. R-042"></label></fieldset>
+          <fieldset><legend>Objet <small>facultatif</small></legend><label>Nom de l’objet<input name="object" value="objet en vadrouille" placeholder="Ex. trousseau de clés"></label><label>Identifiant<input name="identifier" placeholder="Ex. R-042"></label></fieldset>
           <button type="submit" class="primary">Générer mon étiquette</button>
           <p id="form-error" class="form-error" role="alert"></p>
         </form>
-      </section>
-      <section id="label-section" class="label-section" hidden>
-        <div class="label-controls"><div><p class="eyebrow">Prête à imprimer</p><h2>Votre étiquette</h2></div><label class="size-picker">Dimension<select id="label-size"><option value="small">Petite · 50 mm</option><option value="medium" selected>Moyenne · 70 mm</option><option value="large">Grande · 90 mm</option></select></label></div>
-        <div id="print-label" class="print-label size-medium"><strong>🧭 JE ME SUIS PERDU !</strong><div id="qrcode" aria-label="QR code de votre objet"></div><em>Je compte sur vous…</em></div>
-        <button id="print-button" class="primary print-button" type="button">Imprimer l’étiquette</button>
       </section>
     </main>
 
