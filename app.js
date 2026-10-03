@@ -5,6 +5,7 @@ const qrTarget = document.querySelector('#qrcode');
 const error = document.querySelector('#form-error');
 const storageKey = 'retrouve-moi-settings';
 const PUBLIC_BASE_URL = 'https://88ja88.github.io/RETROUVE-MOI/';
+const DEFAULT_OBJECT = 'objet en vadrouille';
 
 function encodePayload(value) {
   return btoa(unescape(encodeURIComponent(JSON.stringify(value)))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
@@ -24,7 +25,7 @@ function showFinder(payload) {
     const actions = document.querySelector('#contact-actions'); actions.innerHTML = '';
     if (payload.p) {
       actions.append(contactLink(`tel:${payload.p}`, '📞', 'Appeler', payload.p));
-      const message = `Bonjour, j’ai rencontré votre ${payload.o || 'objet en vadrouille'}.`;
+      const message = `Bonjour, j’ai rencontré votre ${payload.o || DEFAULT_OBJECT}.`;
       actions.append(contactLink(`sms:${payload.p}?body=${encodeURIComponent(message)}`, '💬', 'Envoyer un SMS', payload.p));
     }
     if (payload.e) actions.append(contactLink(`mailto:${payload.e}`, '📩', 'Envoyer un e-mail', payload.e));
@@ -40,8 +41,6 @@ function contactLink(href, icon, label, detail) {
 
 function startOwner() {
   try { setFormValues(JSON.parse(localStorage.getItem(storageKey) || '{}')); } catch { /* First use or unreadable saved settings. */ }
-  const objectInput = form.elements.namedItem('object');
-  if (objectInput && !objectInput.value) objectInput.value = 'objet en vadrouille';
   form.addEventListener('submit', (event) => {
     event.preventDefault(); error.textContent = '';
     const values = Object.fromEntries(new FormData(form).entries());
@@ -49,7 +48,7 @@ function startOwner() {
     if (!name) return void (error.textContent = 'Indiquez votre prénom ou vos initiales.');
     if (!phone && !email) return void (error.textContent = 'Indiquez un téléphone ou une adresse e-mail.');
     localStorage.setItem(storageKey, JSON.stringify(values));
-    const data = { n: name, p: phone || undefined, e: email || undefined, o: clean(values.object || '') || undefined, i: clean(values.identifier || '') || undefined };
+    const data = { n: name, p: phone || undefined, e: email || undefined, o: DEFAULT_OBJECT };
     const url = `${PUBLIC_BASE_URL}#r=${encodePayload(data)}`;
     qrTarget.replaceChildren();
     new QRCode(qrTarget, { text: url, width: 280, height: 280, colorDark: '#163a59', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
