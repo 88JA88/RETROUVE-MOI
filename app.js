@@ -41,6 +41,9 @@ function contactLink(href, icon, label, detail) {
 
 function startOwner() {
   try { setFormValues(JSON.parse(localStorage.getItem(storageKey) || '{}')); } catch { /* First use or unreadable saved settings. */ }
+  form.addEventListener('input', () => {
+    localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(new FormData(form).entries())));
+  });
   form.addEventListener('submit', (event) => {
     event.preventDefault(); error.textContent = '';
     const values = Object.fromEntries(new FormData(form).entries());
