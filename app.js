@@ -10,6 +10,9 @@ const DEFAULT_OBJECT = 'objet en vadrouille';
 const profileSelect = document.querySelector('#profile-select');
 const saveProfileButton = document.querySelector('#save-profile');
 const deleteProfileButton = document.querySelector('#delete-profile');
+const exportProfilesButton = document.querySelector('#export-profiles');
+const importProfilesButton = document.querySelector('#import-profiles');
+const importFileInput = document.querySelector('#import-file');
 
 function encodePayload(value) {
   return btoa(unescape(encodeURIComponent(JSON.stringify(value)))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
@@ -22,6 +25,7 @@ function clean(value) { return value.trim(); }
 function setFormValues(values) { Object.entries(values).forEach(([name, value]) => { const input = form.elements.namedItem(name); if (input && typeof value === 'string') input.value = value; }); }
 function getProfiles() { try { return JSON.parse(localStorage.getItem(profilesKey) || '[]'); } catch { return []; } }
 function saveProfiles(profiles) { localStorage.setItem(profilesKey, JSON.stringify(profiles)); }
+function profileId() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`; }
 function renderProfiles(selectedId = '') {
   const profiles = getProfiles();
   profileSelect.replaceChildren(new Option('Nouveau profil', ''));
@@ -76,7 +80,7 @@ function startOwner() {
       return;
     }
     const profiles = getProfiles();
-    const id = profileSelect.value || crypto.randomUUID();
+    const id = profileSelect.value || profileId();
     const index = profiles.findIndex(item => item.id === id);
     const savedProfile = { ...profile, id };
     if (index >= 0) profiles[index] = savedProfile; else profiles.push(savedProfile);
@@ -86,6 +90,35 @@ function startOwner() {
     if (!profileSelect.value || !confirm('Supprimer ce profil ?')) return;
     saveProfiles(getProfiles().filter(item => item.id !== profileSelect.value));
     renderProfiles(); error.textContent = 'Profil supprimé.';
+  });
+  exportProfilesButton.addEventListener('click', () => {
+    const profiles = getProfiles();
+    if (!profiles.length) { error.textContent = 'Aucun profil à exporter.'; return; }
+    const content = JSON.stringify({ application: 'RETROUVE-moi', profils: profiles, exporteLe: new Date().toISOString() }, null, 2);
+    const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));
+    const link = document.createElement('a'); link.href = url; link.download = 'retrouve-moi-profils.json'; link.click();
+    URL.revokeObjectURL(url); error.textContent = 'Profils exportés.';
+  });
+  importProfilesButton.addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', async () => {
+    const file = importFileInput.files[0]; if (!file) return;
+    try {
+      const content = JSON.parse(await file.text());
+      const imported = Array.isArray(content) ? content : content.profils;
+      if (!Array.isArray(imported)) throw new Error();
+      const profiles = getProfiles();
+      const known = new Set(profiles.map(item => `${item.name}|${item.phone}|${item.email}`));
+      let added = 0;
+      imported.forEach(item => {
+        if (!item || typeof item.name !== 'string' || typeof item.phone !== 'string' || typeof item.email !== 'string' || (!item.phone && !item.email)) return;
+        const key = `${item.name}|${item.phone}|${item.email}`;
+        if (known.has(key)) return;
+        profiles.push({ id: profileId(), name: item.name, phone: item.phone, email: item.email }); known.add(key); added += 1;
+      });
+      if (!added) throw new Error();
+      saveProfiles(profiles); renderProfiles(); error.textContent = `${added} profil${added > 1 ? 's' : ''} importé${added > 1 ? 's' : ''}.`;
+    } catch { error.textContent = 'Ce fichier JSON ne contient aucun profil valide.'; }
+    importFileInput.value = '';
   });
   form.addEventListener('input', () => {
     localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(new FormData(form).entries())));
