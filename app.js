@@ -7,12 +7,15 @@ const storageKey = 'retrouve-moi-settings';
 const profilesKey = 'retrouve-moi-profiles';
 const PUBLIC_BASE_URL = 'https://88ja88.github.io/RETROUVE-MOI/';
 const DEFAULT_OBJECT = 'objet en vadrouille';
+const APP_VERSION = '1.0.2';
 const profileSelect = document.querySelector('#profile-select');
 const saveProfileButton = document.querySelector('#save-profile');
 const deleteProfileButton = document.querySelector('#delete-profile');
 const exportProfilesButton = document.querySelector('#export-profiles');
 const importProfilesButton = document.querySelector('#import-profiles');
 const importFileInput = document.querySelector('#import-file');
+const updateAppButton = document.querySelector('#update-app');
+const updateStatus = document.querySelector('#update-status');
 
 function encodePayload(value) {
   return btoa(unescape(encodeURIComponent(JSON.stringify(value)))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
@@ -39,6 +42,28 @@ function profileValues() {
     phone: clean(form.elements.namedItem('phone').value),
     email: clean(form.elements.namedItem('email').value),
   };
+}
+async function updateApplication() {
+  if (location.protocol === 'file:') {
+    updateStatus.textContent = 'La dernière version web va s’ouvrir.';
+    window.open(PUBLIC_BASE_URL, '_blank', 'noopener');
+    return;
+  }
+  updateStatus.textContent = 'Vérification…';
+  try {
+    const response = await fetch(`${PUBLIC_BASE_URL}app-version.json?${Date.now()}`, { cache: 'no-store' });
+    const latest = await response.json();
+    if (latest.version === APP_VERSION) {
+      updateStatus.textContent = 'Votre application est à jour.';
+      return;
+    }
+    updateStatus.textContent = 'Nouvelle version trouvée : actualisation…';
+    const registration = await navigator.serviceWorker?.getRegistration();
+    await registration?.update();
+    location.reload();
+  } catch {
+    updateStatus.textContent = 'Vérification impossible pour le moment.';
+  }
 }
 
 function showFinder(payload) {
@@ -145,4 +170,5 @@ function startOwner() {
 
 const match = location.hash.match(/^#r=([A-Za-z0-9_-]+)$/);
 if (match) { try { showFinder(decodePayload(match[1])); } catch { location.hash = ''; startOwner(); } } else startOwner();
+updateAppButton.addEventListener('click', updateApplication);
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
