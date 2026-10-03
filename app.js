@@ -24,8 +24,7 @@ function showFinder(payload) {
     const actions = document.querySelector('#contact-actions'); actions.innerHTML = '';
     if (payload.p) {
       actions.append(contactLink(`tel:${payload.p}`, '📞', 'Appeler', payload.p));
-      const message = `Bonjour, j’ai rencontré votre ${payload.o || 'objet en vadrouille'}.`;
-      actions.append(contactLink(`sms:${payload.p}?body=${encodeURIComponent(message)}`, '💬', 'Envoyer un SMS', payload.p));
+      actions.append(contactLink(`sms:${payload.p}`, '💬', 'Envoyer un SMS', payload.p));
     }
     if (payload.e) actions.append(contactLink(`mailto:${payload.e}`, '📩', 'Envoyer un e-mail', payload.e));
     document.querySelector('#finder-start').hidden = true;
@@ -40,8 +39,6 @@ function contactLink(href, icon, label, detail) {
 
 function startOwner() {
   try { setFormValues(JSON.parse(localStorage.getItem(storageKey) || '{}')); } catch { /* First use or unreadable saved settings. */ }
-  const objectInput = form.elements.namedItem('object');
-  if (objectInput && !objectInput.value) objectInput.value = 'objet en vadrouille';
   form.addEventListener('submit', (event) => {
     event.preventDefault(); error.textContent = '';
     const values = Object.fromEntries(new FormData(form).entries());
