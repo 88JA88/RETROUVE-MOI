@@ -4,8 +4,12 @@ const labelSection = document.querySelector('#label-section');
 const qrTarget = document.querySelector('#qrcode');
 const error = document.querySelector('#form-error');
 const storageKey = 'retrouve-moi-settings';
+const profilesKey = 'retrouve-moi-profiles';
 const PUBLIC_BASE_URL = 'https://88ja88.github.io/RETROUVE-MOI/';
 const DEFAULT_OBJECT = 'objet en vadrouille';
+const profileSelect = document.querySelector('#profile-select');
+const saveProfileButton = document.querySelector('#save-profile');
+const deleteProfileButton = document.querySelector('#delete-profile');
 
 function encodePayload(value) {
   return btoa(unescape(encodeURIComponent(JSON.stringify(value)))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
@@ -16,6 +20,22 @@ function decodePayload(value) {
 }
 function clean(value) { return value.trim(); }
 function setFormValues(values) { Object.entries(values).forEach(([name, value]) => { const input = form.elements.namedItem(name); if (input && typeof value === 'string') input.value = value; }); }
+function getProfiles() { try { return JSON.parse(localStorage.getItem(profilesKey) || '[]'); } catch { return []; } }
+function saveProfiles(profiles) { localStorage.setItem(profilesKey, JSON.stringify(profiles)); }
+function renderProfiles(selectedId = '') {
+  const profiles = getProfiles();
+  profileSelect.replaceChildren(new Option('Nouveau profil', ''));
+  profiles.forEach(profile => profileSelect.add(new Option(profile.name, profile.id)));
+  profileSelect.value = selectedId;
+  deleteProfileButton.hidden = !selectedId;
+}
+function profileValues() {
+  return {
+    name: clean(form.elements.namedItem('name').value),
+    phone: clean(form.elements.namedItem('phone').value),
+    email: clean(form.elements.namedItem('email').value),
+  };
+}
 
 function showFinder(payload) {
   document.title = 'RETROUVE-moi';
@@ -41,6 +61,32 @@ function contactLink(href, icon, label, detail) {
 
 function startOwner() {
   try { setFormValues(JSON.parse(localStorage.getItem(storageKey) || '{}')); } catch { /* First use or unreadable saved settings. */ }
+  const objectInput = form.elements.namedItem('object');
+  if (objectInput && !objectInput.value) objectInput.value = DEFAULT_OBJECT;
+  renderProfiles();
+  profileSelect.addEventListener('change', () => {
+    const profile = getProfiles().find(item => item.id === profileSelect.value);
+    if (profile) setFormValues(profile);
+    deleteProfileButton.hidden = !profile;
+  });
+  saveProfileButton.addEventListener('click', () => {
+    const profile = profileValues();
+    if (!profile.name || (!profile.phone && !profile.email)) {
+      error.textContent = 'Indiquez un prénom et un moyen de contact avant d’enregistrer ce profil.';
+      return;
+    }
+    const profiles = getProfiles();
+    const id = profileSelect.value || crypto.randomUUID();
+    const index = profiles.findIndex(item => item.id === id);
+    const savedProfile = { ...profile, id };
+    if (index >= 0) profiles[index] = savedProfile; else profiles.push(savedProfile);
+    saveProfiles(profiles); renderProfiles(id); error.textContent = 'Profil enregistré.';
+  });
+  deleteProfileButton.addEventListener('click', () => {
+    if (!profileSelect.value || !confirm('Supprimer ce profil ?')) return;
+    saveProfiles(getProfiles().filter(item => item.id !== profileSelect.value));
+    renderProfiles(); error.textContent = 'Profil supprimé.';
+  });
   form.addEventListener('input', () => {
     localStorage.setItem(storageKey, JSON.stringify(Object.fromEntries(new FormData(form).entries())));
   });
