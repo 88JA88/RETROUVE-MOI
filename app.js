@@ -51,7 +51,8 @@ function startOwner() {
     if (!name) return void (error.textContent = 'Indiquez votre prénom ou vos initiales.');
     if (!phone && !email) return void (error.textContent = 'Indiquez un téléphone ou une adresse e-mail.');
     localStorage.setItem(storageKey, JSON.stringify(values));
-    const data = { n: name, p: phone || undefined, e: email || undefined, o: DEFAULT_OBJECT };
+    const objectName = clean(values.object || '') || DEFAULT_OBJECT;
+    const data = { n: name, p: phone || undefined, e: email || undefined, o: objectName };
     const url = `${PUBLIC_BASE_URL}#r=${encodePayload(data)}`;
     qrTarget.replaceChildren();
     new QRCode(qrTarget, { text: url, width: 280, height: 280, colorDark: '#163a59', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
