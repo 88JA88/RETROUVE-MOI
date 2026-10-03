@@ -9,6 +9,7 @@ const PUBLIC_BASE_URL = 'https://88ja88.github.io/RETROUVE-MOI/';
 const DEFAULT_OBJECT = 'objet en vadrouille';
 const APP_VERSION = '1.0.2';
 const profileSelect = document.querySelector('#profile-select');
+const newProfileButton = document.querySelector('#new-profile');
 const saveProfileButton = document.querySelector('#save-profile');
 const deleteProfileButton = document.querySelector('#delete-profile');
 const exportProfilesButton = document.querySelector('#export-profiles');
@@ -31,7 +32,7 @@ function saveProfiles(profiles) { localStorage.setItem(profilesKey, JSON.stringi
 function profileId() { return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`; }
 function renderProfiles(selectedId = '') {
   const profiles = getProfiles();
-  profileSelect.replaceChildren(new Option('Nouveau profil', ''));
+  profileSelect.replaceChildren(new Option('Choisir un profil…', ''));
   profiles.forEach(profile => profileSelect.add(new Option(profile.name, profile.id)));
   profileSelect.value = selectedId;
   deleteProfileButton.hidden = !selectedId;
@@ -97,6 +98,12 @@ function startOwner() {
     const profile = getProfiles().find(item => item.id === profileSelect.value);
     if (profile) setFormValues(profile);
     deleteProfileButton.hidden = !profile;
+  });
+  newProfileButton.addEventListener('click', () => {
+    setFormValues({ name: '', phone: '', email: '', object: DEFAULT_OBJECT });
+    profileSelect.value = ''; deleteProfileButton.hidden = true;
+    error.textContent = 'Nouveau profil : renseignez ses coordonnées, puis enregistrez-le.';
+    form.elements.namedItem('name').focus();
   });
   saveProfileButton.addEventListener('click', () => {
     const profile = profileValues();
