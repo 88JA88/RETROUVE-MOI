@@ -44,6 +44,10 @@ function profileValues() {
     email: clean(form.elements.namedItem('email').value),
   };
 }
+function resetLabel() {
+  qrTarget.replaceChildren();
+  labelSection.hidden = true;
+}
 async function updateApplication() {
   if (location.protocol === 'file:') {
     updateStatus.textContent = 'La dernière version web va s’ouvrir.';
@@ -98,10 +102,12 @@ function startOwner() {
     const profile = getProfiles().find(item => item.id === profileSelect.value);
     if (profile) setFormValues(profile);
     deleteProfileButton.hidden = !profile;
+    resetLabel();
   });
   newProfileButton.addEventListener('click', () => {
     setFormValues({ name: '', phone: '', email: '', object: DEFAULT_OBJECT });
     profileSelect.value = ''; deleteProfileButton.hidden = true;
+    resetLabel();
     error.textContent = 'Nouveau profil : renseignez ses coordonnées, puis enregistrez-le.';
     form.elements.namedItem('name').focus();
   });
