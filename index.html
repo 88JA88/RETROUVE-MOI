@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#163a59" />
+    <meta name="description" content="Créez une étiquette QR pour retrouver vos objets." />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>#qrcode canvas { width: 100%; height: 100%; }</style>
+    <title>RETROUVE-moi</title>
+  </head>
+  <body>
+    <main id="owner-view" class="owner-view">
+      <header class="site-header"><a class="brand" href="./"><span>✦</span> RETROUVE-moi</a></header>
+      <section class="owner-layout">
+        <div class="intro">
+          <p class="eyebrow">Créer une étiquette</p>
+          <h1>Une petite étiquette.<br><em>Un grand soulagement.</em></h1>
+          <p>Vos coordonnées sont intégrées au QR, sans compte ni serveur. La personne qui trouve votre objet choisit d’abord de vous aider.</p>
+        </div>
+        <form id="owner-form" class="settings-card">
+          <h2>Vos coordonnées</h2>
+          <label>Prénom ou initiales<input name="name" autocomplete="name" required placeholder="Ex. Julie ou J. Martin"></label>
+          <div class="two-columns">
+            <label>Téléphone<input name="phone" type="tel" autocomplete="tel" placeholder="06 00 00 00 00"></label>
+            <label>E-mail<input name="email" type="email" autocomplete="email" placeholder="vous@exemple.fr"></label>
+          </div>
+          <p class="hint">Indiquez au moins un moyen de contact.</p>
+          <fieldset><legend>Objet <small>facultatif</small></legend><label>Nom de l’objet<input name="object" placeholder="Ex. trousseau de clés"></label><label>Identifiant<input name="identifier" placeholder="Ex. R-042"></label></fieldset>
+          <button type="submit" class="primary">Générer mon étiquette</button>
+          <p id="form-error" class="form-error" role="alert"></p>
+        </form>
+      </section>
+      <section id="label-section" class="label-section" hidden>
+        <div class="label-controls"><div><p class="eyebrow">Prête à imprimer</p><h2>Votre étiquette</h2></div><label class="size-picker">Dimension<select id="label-size"><option value="small">Petite · 50 mm</option><option value="medium" selected>Moyenne · 70 mm</option><option value="large">Grande · 90 mm</option></select></label></div>
+        <div id="print-label" class="print-label size-medium"><strong>🧭 JE ME SUIS PERDU !</strong><div id="qrcode" aria-label="QR code de votre objet"></div><em>Je compte sur vous…</em></div>
+        <button id="print-button" class="primary print-button" type="button">Imprimer l’étiquette</button>
+      </section>
+    </main>
+
+    <main id="finder-view" class="finder-view" hidden>
+      <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+      <section class="finder-card">
+        <a class="finder-brand" href="./">RETROUVE-moi</a>
+        <div class="compass" aria-hidden="true">✦</div>
+        <div id="finder-start">
+          <p class="celebrate">🎉 Vous m’avez retrouvé !</p>
+          <h1>Mon propriétaire doit désespérément me chercher…</h1>
+          <p>Pouvez-vous l’aider à me récupérer ?</p>
+          <button id="help-button" class="primary" type="button">Oui, bien sûr ! 🙂</button>
+          <small>Les coordonnées restent masquées jusqu’à votre choix.</small>
+        </div>
+        <div id="finder-contact" hidden>
+          <p class="celebrate">Grand merci ! 🧭</p>
+          <h1>Vous pouvez maintenant le contacter directement.</h1>
+          <div id="contact-actions" class="contact-actions"></div>
+          <small>Vous pouvez convenir ensemble des modalités de restitution.</small>
+        </div>
+      </section>
+    </main>
+    <script src="vendor/qrcode.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
